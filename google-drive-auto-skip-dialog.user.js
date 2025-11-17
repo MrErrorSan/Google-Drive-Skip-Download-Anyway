@@ -3,7 +3,7 @@
 // @namespace    http://tampermonkey.net/
 // @version      1.0.0
 // @description  Automatically clicks "Download anyway" when Google Drive shows the warning dialog
-// @author       You
+// @author       MrErrorSan
 // @match        https://drive.google.com/*
 // @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
 // @grant        none

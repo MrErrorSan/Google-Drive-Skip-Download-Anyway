@@ -3,7 +3,7 @@
 // @namespace    http://tampermonkey.net/
 // @version      2.0.0
 // @description  [EXPERIMENTAL] Advanced batch downloader with side panel, file selection, and Google Drive theme
-// @author       You
+// @author       MrErrorSan
 // @match        https://drive.google.com/*
 // @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
 // @grant        GM_setValue
@@ -30,6 +30,8 @@
     let scanDebounceTimer = null;
     let lastScanTime = 0;
     let panelVisible = false;
+    let dialogMonitorInterval = null;
+    let isInitialized = false;
 
     // Add custom styles matching Google Drive theme
     GM_addStyle(`
@@ -745,7 +747,13 @@
         link.click();
         
         setTimeout(() => {
-            document.body.removeChild(link);
+            try {
+                if (link.parentNode) {
+                    document.body.removeChild(link);
+                }
+            } catch (e) {
+                console.log('Error removing download link:', e);
+            }
             if (callback) callback();
         }, 1000);
     }
@@ -753,6 +761,7 @@
     // Format file size
     function formatFileSize(bytes) {
         if (bytes === 0) return '0 Bytes';
+        if (!bytes || isNaN(bytes) || bytes < 0) return '0 Bytes';
         const k = 1024;
         const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -763,7 +772,12 @@
     function monitorDownloadDialog() {
         if (!CONFIG.autoSkipDialog) return;
 
-        setInterval(() => {
+        // Clear existing interval if any
+        if (dialogMonitorInterval) {
+            clearInterval(dialogMonitorInterval);
+        }
+
+        dialogMonitorInterval = setInterval(() => {
             const dialogs = document.querySelectorAll('[role="dialog"], [role="alertdialog"]');
             dialogs.forEach(dialog => {
                 const dialogText = dialog.textContent.toLowerCase();
@@ -787,6 +801,11 @@
 
     // Watch for changes
     function watchForChanges() {
+        // Disconnect existing observer if any
+        if (observer) {
+            observer.disconnect();
+        }
+
         observer = new MutationObserver((mutations) => {
             const now = Date.now();
             if (now - lastScanTime < 2000) return;
@@ -816,15 +835,15 @@
 
     // Initialize
     function init() {
+        // Prevent multiple initializations
+        if (isInitialized) return;
+
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', init);
             return;
         }
 
-        if (!window.location.hostname.includes('drive.google.com')) {
-            return;
-        }
-
+        isInitialized = true;
         createSidePanel();
         monitorDownloadDialog();
         watchForChanges();
