@@ -5,7 +5,7 @@
 // @description  [EXPERIMENTAL] Advanced batch downloader with side panel, file selection, and Google Drive theme
 // @author       MrErrorSan
 // @match        https://drive.google.com/*
-// @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=drive.google.com
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @grant        GM_addStyle
