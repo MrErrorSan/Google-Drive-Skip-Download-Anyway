@@ -1,0 +1,83 @@
+name: Pull Request Checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  pr-validation:
+    name: PR Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Check for userscript files
+      run: |
+        echo "Checking for userscript files..."
+        count=$(find . -name "*.user.js" -not -path "./node_modules/*" | wc -l)
+        if [ $count -eq 0 ]; then
+          echo "⚠️  No .user.js files found in PR"
+        else
+          echo "✅ Found $count userscript file(s)"
+        fi
+    
+    - name: Validate userscript headers
+      run: |
+        echo "Validating userscript headers..."
+        for file in *.user.js; do
+          if [ -f "$file" ]; then
+            echo "Checking $file..."
+            # Check version number format
+            if ! grep -q "@version.*[0-9]\+\.[0-9]\+\.[0-9]\+" "$file"; then
+              echo "⚠️  $file: Version format might be incorrect"
+            fi
+            # Check description
+            if ! grep -q "@description" "$file"; then
+              echo "⚠️  $file: Missing @description"
+            fi
+            echo "✅ $file: Header validation complete"
+          fi
+        done
+    
+    - name: Check file changes
+      run: |
+        echo "Files changed in this PR:"
+        git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E '\.(js|md|yml)$' || echo "No relevant files changed"
+
+  code-quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Check for TODO/FIXME comments
+      run: |
+        echo "Checking for TODO/FIXME comments..."
+        for file in *.user.js; do
+          if [ -f "$file" ]; then
+            todos=$(grep -c -i "TODO\|FIXME" "$file" || true)
+            if [ $todos -gt 0 ]; then
+              echo "ℹ️  $file: Contains $todos TODO/FIXME comment(s)"
+            fi
+          fi
+        done
+    
+    - name: Check code formatting
+      run: |
+        echo "Checking basic code formatting..."
+        for file in *.user.js; do
+          if [ -f "$file" ]; then
+            # Check for proper semicolons (basic check)
+            if grep -q "function.*{" "$file" && ! grep -q "use strict" "$file"; then
+              echo "⚠️  $file: Consider adding 'use strict'"
+            fi
+            echo "✅ $file: Basic formatting check complete"
+          fi
+        done
+

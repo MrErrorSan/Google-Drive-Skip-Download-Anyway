@@ -1,0 +1,51 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Extract version
+      id: version
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/v}
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "Release version: $VERSION"
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        name: Release v${{ steps.version.outputs.version }}
+        body: |
+          ## Release v${{ steps.version.outputs.version }}
+          
+          ### Installation
+          
+          Click the raw file link to install:
+          
+          - [google-drive-auto-skip-dialog.user.js](https://raw.githubusercontent.com/${{ github.repository }}/v${{ steps.version.outputs.version }}/google-drive-auto-skip-dialog.user.js)
+          
+          ### Changes
+          
+          See [CHANGELOG.md](CHANGELOG.md) for details.
+          
+          ---
+          
+          **Note**: Always download from the [main branch](https://raw.githubusercontent.com/${{ github.repository }}/main/google-drive-auto-skip-dialog.user.js) for the latest version.
+        files: |
+          *.user.js
+          README.md
+          LICENSE
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

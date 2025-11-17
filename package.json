@@ -1,0 +1,28 @@
+{
+  "name": "google-drive-skip-download-anyway",
+  "version": "1.0.0",
+  "description": "A simple, lightweight userscript that automatically clicks 'Download anyway' when Google Drive shows the virus scan warning dialog",
+  "scripts": {
+    "lint": "echo 'Linting userscripts...' && node -e \"const fs=require('fs');fs.readdirSync('.').filter(f=>f.endsWith('.user.js')).forEach(f=>{const c=fs.readFileSync(f,'utf8');if(!c.includes('==UserScript=='))throw new Error(f+': Missing userscript header');console.log('✅ '+f+' validated');})\"",
+    "validate": "npm run lint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MrErrorSan/Google-Drive-Skip-Download-Anyway.git"
+  },
+  "keywords": [
+    "userscript",
+    "google-drive",
+    "tampermonkey",
+    "violentmonkey",
+    "download",
+    "automation"
+  ],
+  "author": "MrErrorSan",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MrErrorSan/Google-Drive-Skip-Download-Anyway/issues"
+  },
+  "homepage": "https://github.com/MrErrorSan/Google-Drive-Skip-Download-Anyway#readme"
+}
+
